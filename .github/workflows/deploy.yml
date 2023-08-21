@@ -1,7 +1,7 @@
 name: Test 
 on:
   schedule:
-    - cron: "0 10 * * *" # 00:00 1st of every month
+    - cron: "30 10 * * *" # 00:00 1st of every month
 
 jobs:
     run-python-test:
@@ -9,17 +9,24 @@ jobs:
         name: "Run Python Test"
         steps:
             - name: checkout repo content
-              uses: actions/checkout@v2 # checkout the repository content
+              uses: actions/checkout@v2
       
             - name: setup python
               uses: actions/setup-python@v4
               with:
-                python-version: '3.10' # install the python version needed
+                python-version: '3.10'
       
             - name: install python packages
               run: |
                 python -m pip install --upgrade pip
                 pip install -r requirements.txt
-      
-            - name: execute py script # run main.py
+                
+            - name: Configure AWS Creds - Staging
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                aws-access-key-id: ${{ secrets.AWS_STAGING_ACCESS_KEY_ID }}
+                aws-secret-access-key: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
+                aws-region: eu-west-1
+
+            - name: execute python script
               run: python test_script.py
