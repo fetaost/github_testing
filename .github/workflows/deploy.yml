@@ -57,6 +57,8 @@ jobs:
               ECR_REPOSITORY: otto_testing # Replace
               IMAGE_TAG: otto_test_image # Replace
             run: |
+              echo $ECR_REGISTRY
+              echo $ECR_REPOSITORY
               docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
               docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
               
