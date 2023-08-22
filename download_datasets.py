@@ -27,7 +27,7 @@ def get_trafiklab_gtfs():
 
 
 def get_mock_data():
-    with open("sweden.pbf", "wb") as f:
+    with open("sweden.pbf", "w") as f:
         f.write("THIS IS MOCKDATA 123123123")
 
 
