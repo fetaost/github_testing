@@ -4,29 +4,59 @@ on:
     - cron: "30 10 * * *" # 00:00 1st of every month
 
 jobs:
-    run-python-test:
+    download-datasets:
         runs-on: ubuntu-latest
-        name: "Run Python Test"
+        name: Download Datasets
         steps:
-            - name: checkout repo content
-              uses: actions/checkout@v2
-      
-            - name: setup python
-              uses: actions/setup-python@v4
-              with:
-                python-version: '3.10'
-      
-            - name: install python packages
-              run: |
-                python -m pip install --upgrade pip
-                pip install -r requirements.txt
-                
-            - name: Configure AWS Creds - Staging
-              uses: aws-actions/configure-aws-credentials@v1
-              with:
-                aws-access-key-id: ${{ secrets.AWS_STAGING_ACCESS_KEY_ID }}
-                aws-secret-access-key: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
-                aws-region: eu-west-1
+          - name: checkout repo content # Maybe change to specify branch prod
+            uses: actions/checkout@v2
+    
+          - name: setup python
+            uses: actions/setup-python@v4
+            with:
+              python-version: '3.10'
+    
+          - name: install python packages
+            run: |
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+              
+          - name: Configure AWS Creds - Staging # Switch to prod
+            uses: aws-actions/configure-aws-credentials@v1
+            with:
+              aws-access-key-id: ${{ secrets.AWS_STAGING_ACCESS_KEY_ID }} # Switch to prod
+              aws-secret-access-key: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }} # Switch to prod
+              aws-region: eu-west-1
 
-            - name: execute python script
-              run: python test_script.py
+          - name: execute python script
+            run: python download_datasets.py
+
+
+
+    build-containers:
+        runs-on: ubuntu-latest
+        name: Build Containers
+        steps:
+          - name: Check out code
+            uses: actions/checkout@v2
+
+          - name: Configure AWS Creds - Staging # Switch to prod
+            uses: aws-actions/configure-aws-credentials@v1
+            with:
+              aws-access-key-id: ${{ secrets.AWS_STAGING_ACCESS_KEY_ID }} # Switch to prod
+              aws-secret-access-key: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }} # Switch to prod
+              aws-region: eu-west-1
+          
+          - name: Login to Amazon ECR
+            id: login-ecr
+            uses: aws-actions/amazon-ecr-login@v1
+
+          - name: Build, tag, and push image to Amazon ECR
+            env:
+              ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+              ECR_REPOSITORY: otto_testing # Replace
+              IMAGE_TAG: otto_test_image # Replace
+            run: |
+              docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+              docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+              
