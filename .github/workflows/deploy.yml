@@ -1,7 +1,7 @@
 name: Test 
 on:
   schedule:
-    - cron: "30 11 * * *" # 00:00 1st of every month
+    - cron: "35 7 * * *" # 00:00 1st of every month
 
 jobs:
     download-datasets:
