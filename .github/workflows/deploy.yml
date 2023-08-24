@@ -1,7 +1,7 @@
 name: Test 
 on:
   schedule:
-    - cron: "10 8 * * *" # 00:00 1st of every month
+    - cron: "10 8 2 2 *" # 00:00 1st of every month
 
 jobs:
     download-datasets:
@@ -60,7 +60,7 @@ jobs:
               docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
               docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
               DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG)
-              PARAMETER_NAME="${IMAGE_TAG}_digest_id"
+              PARAMETER_NAME="${IMAGE_TAG}_digest_id"A
               aws ssm put-parameter \
                   --name $PARAMETER_NAME \
                   --value $DIGEST \
